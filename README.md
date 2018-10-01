@@ -1,6 +1,4 @@
 # StayHere
-CS4389_Project Final Group Project 
+CS4389_Project Final Group Project
 
-Implement a Mock Airbnb and implement security features 
-
-
+Implement a Mock Airbnb and implement several security features
