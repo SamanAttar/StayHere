@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<h1> TODO: Fix This issue </h1>
+  <h1> Properties </h1>
+    <ul class="list-group">
+      {% for property in properties %}
+        <li class="list-group-item"><a href="property/{{property.id}}">{{property.title}}</a></li>
+      {% endfor %}
+    </ul>
+{% endblock %}
+
+
+
+<!--
+<h1> Properties </h1>
+  <ul class="list-group">
+    {% for property in properties %}
+      <li class="list-group-item"><a href="properties/{{properties.id}}">{{property.title}}</a></li>
+    {% endfor %}
+  </ul>
+-->
