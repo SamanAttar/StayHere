@@ -34,7 +34,7 @@ def property(id):
     return render_template('property.html', id=id)
 
 
-@app.route('/property/search', methods = ['POST'])
+@app.route('/propertySearch', methods = ['POST'])
 def searchProperties():
     # eventually query db on location, guests, and maybe checkin and checkout dates
     results = Properties
