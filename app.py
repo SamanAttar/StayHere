@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from propertyData import Properties
 
 app = Flask(__name__) #placeholder for app.py
@@ -32,6 +32,18 @@ def properties():
 @app.route('/property/<string:id>')
 def property(id):
     return render_template('property.html', id=id)
+
+
+@app.route('/property/search', methods = ['POST'])
+def searchProperties():
+    # eventually query db on location, guests, and maybe checkin and checkout dates
+    results = Properties
+    searchLocation = request.form['location']
+    if searchLocation is not None and searchLocation != '':
+        results = list(filter(lambda x: searchLocation.lower() in x['location'].lower(), results))
+    searchGuests = int(request.form['guests'])
+    results = list(filter(lambda x: x['guests'] >= searchGuests, results))
+    return render_template('properties.html', properties = results)
 
 
 

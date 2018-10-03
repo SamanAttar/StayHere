@@ -4,5 +4,29 @@
   <div class="jumbotron text-center">
     <h1>Welcome To StayHere</h1>
     <p class="lead"> Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <div class="continer col-6 bg-white">
+      <h2>Book unique homes and experiences.</h2>
+      <form class="text-left form row " action="/property/search" method="post">
+        <div class="form-group col-12">
+          <label for="location_input">Where:</label>
+          <input id="location_input" class="form-control" type="text" name="location">
+        </div>
+        <div class="form-group col-6">
+          <label for="checkin_input">Check in:</label>
+          <input id="checkin_input" class="form-control" type="date" name="checkin">
+        </div>
+        <div class="form-group col-6">
+          <label for="checkout_input">Check out:</label>
+          <input id="checkout_input" class="form-control" type="date" name="checkout">
+        </div>
+        <div class="form-group col-12">
+          <label for="guests_input">Guests:</label>
+          <input id="guests_input" class="form-control" type="number" name="guests">
+        </div>
+         <div class="form-group offset-10">
+           <input id="search_button" class="btn btn-primary" type="submit" value="Search">
+         </div>
+      </form>
+    </div>
   <div>
 {% endblock %}
