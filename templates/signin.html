@@ -1,8 +1,18 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-  <h1> TODO: Fix This issue </h1>
-  <h1> To Be Implemented soon... right guys?</h1>
-
-  <p> This is going to be the "secure" login page </p> <strong> not vulnerable </strong> <p> to Brute Force, or stupid JavaScript stuff </p>
+  <h1>Login</h1>
+  <div class="jumbotron text-center">
+  <form action="" method="POST">
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" name="username" class="form-control" value={{request.form.username}}>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" name="password" class="form-control" value={{request.form.password}}>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
 {% endblock %}
