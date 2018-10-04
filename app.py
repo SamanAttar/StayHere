@@ -1,15 +1,9 @@
-<<<<<<< Updated upstream
-from flask import Flask, render_template, request
-=======
-<<<<<<< HEAD
 from flask import Flask, request, render_template, flash, redirect, url_for, session, logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
-=======
+
 from flask import Flask, render_template, request
->>>>>>> origin/master
->>>>>>> Stashed changes
 from propertyData import Properties
 
 
@@ -108,13 +102,12 @@ def signup():
 
         mysql.connection.commit()
 
-<<<<<<< HEAD
         flash('You are now registered!', 'success')
         cur.close()
         #con.close()
         return redirect(url_for('signin'))
     return render_template('signup.html', form = form)
-=======
+
 @app.route('/propertySearch', methods = ['POST'])
 def searchProperties():
     # eventually query db on location, guests, and maybe checkin and checkout dates
@@ -125,26 +118,9 @@ def searchProperties():
     searchGuests = int(request.form['guests'])
     results = list(filter(lambda x: x['guests'] >= searchGuests, results))
     return render_template('properties.html', properties = results)
-
-
-<<<<<<< Updated upstream
-@app.route('/propertySearch', methods = ['POST'])
-def searchProperties():
-    # eventually query db on location, guests, and maybe checkin and checkout dates
-    results = Properties
-    searchLocation = request.form['location']
-    if searchLocation is not None and searchLocation != '':
-        results = list(filter(lambda x: searchLocation.lower() in x['location'].lower(), results))
-    searchGuests = int(request.form['guests'])
-    results = list(filter(lambda x: x['guests'] >= searchGuests, results))
-    return render_template('properties.html', properties = results)
-
-
-=======
->>>>>>> origin/master
->>>>>>> Stashed changes
 
 class RegisterForm(Form):
+    user_type = RadioField('Label', choices=[('GuestButton','Guest'),('HostButton','Host')])
     name = StringField('Name', [validators.Length(min=1, max=50)])
     username = StringField('Username', [validators.Length(min=4, max=25)])
     email = StringField('Email', [validators.Length(min=6, max=50)])
