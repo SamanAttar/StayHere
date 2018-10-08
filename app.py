@@ -1,13 +1,7 @@
-
-from flask import Flask, render_template, request
-
 from flask import Flask, request, render_template, flash, redirect, url_for, session, logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
-
-from flask import Flask, render_template, request
-
 from propertyData import Properties
 
 
@@ -85,8 +79,6 @@ def login():
 
     return render_template('signin.html')
 
-
-
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
@@ -106,7 +98,6 @@ def signup():
 
         mysql.connection.commit()
 
-
         flash('You are now registered!', 'success')
         cur.close()
         #con.close()
@@ -124,8 +115,8 @@ def searchProperties():
     results = list(filter(lambda x: x['guests'] >= searchGuests, results))
     return render_template('properties.html', properties = results)
 
-
 class RegisterForm(Form):
+    user_type = RadioField('Label', choices=[('GuestButton','Guest'),('HostButton','Host')])
     name = StringField('Name', [validators.Length(min=1, max=50)])
     username = StringField('Username', [validators.Length(min=4, max=25)])
     email = StringField('Email', [validators.Length(min=6, max=50)])
