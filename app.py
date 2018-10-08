@@ -79,6 +79,12 @@ def login():
 
     return render_template('signin.html')
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    # flash('You are now logged out', 'success') TODO: this doesnt work
+    return render_template('logout.html')
+
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
