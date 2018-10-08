@@ -2,8 +2,6 @@ from flask import Flask, request, render_template, flash, redirect, url_for, ses
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
-
-from flask import Flask, render_template, request
 from propertyData import Properties
 
 
@@ -15,7 +13,7 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'stayhereuser'
 app.config['MYSQL_PASSWORD'] = 'CS4389isCool!'
 app.config['MYSQL_DB'] = 'StayHere'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor' #lets us treat the query as a dictionary, by default treats it as a tuple
 mysql.init_app(app)
 
 
@@ -80,8 +78,6 @@ def login():
             return render_template('signin.html', error=error)
 
     return render_template('signin.html')
-
-
 
 @app.route('/dashboard')
 def dashboard():
