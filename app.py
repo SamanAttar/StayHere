@@ -3,6 +3,7 @@ from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
 from propertyData import Properties
+from RegisterForm import RegisterForm
 
 
 app = Flask('__name__')
@@ -120,18 +121,6 @@ def searchProperties():
     searchGuests = int(request.form['guests'])
     results = list(filter(lambda x: x['guests'] >= searchGuests, results))
     return render_template('properties.html', properties = results)
-
-class RegisterForm(Form):
-    user_type = RadioField('Label', choices=[('GuestButton','Guest'),('HostButton','Host')])
-    name = StringField('Name', [validators.Length(min=1, max=50)])
-    username = StringField('Username', [validators.Length(min=4, max=25)])
-    email = StringField('Email', [validators.Length(min=6, max=50)])
-    password = PasswordField('Password', [
-        validators.DataRequired(),
-        validators.EqualTo('confirm', message = 'Password Does Not Match')
-    ])
-    confirm = PasswordField('Confrim Password')
-
 
 if __name__ == '__main__':
     app.secret_key = 'CS4389isCool!'
