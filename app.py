@@ -4,6 +4,7 @@ from wtforms import Form, StringField, TextAreaField, PasswordField, validators,
 from passlib.hash import sha256_crypt
 from propertyData import Properties
 from RegisterForm import RegisterForm
+from PropertyForm import PropertyForm
 from functools import wraps
 
 
@@ -139,6 +140,29 @@ def searchProperties():
     return render_template('properties.html', properties = results)
 
 
+@app.route('/add_property', methods=['GET', 'POST'])
+@is_logged_in
+def add_property():
+    form = PropertyForm(request.form)
+    if request.method == 'POST' and form.validate():
+        title = form.title.data
+        body = form.body.data
+
+        #create cur cursor
+
+        #execute cur cursor into articles table with title, body, author
+
+        #commit to DB:
+        #close connection
+
+        #flash message
+        flash('Article Created', 'success')
+
+        return redirect(url_for('dashboard'))
+    return render_template('add_property.html', form=form)
+
+
+
 if __name__ == '__main__':
     app.secret_key = 'CS4389isCool!'
-    app.run(debug=True)
+    app.run(port =5050, debug=True)
