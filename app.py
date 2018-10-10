@@ -4,6 +4,7 @@ from wtforms import Form, StringField, TextAreaField, PasswordField, validators,
 from passlib.hash import sha256_crypt
 from propertyData import Properties
 from RegisterForm import RegisterForm
+from functools import wraps
 
 
 app = Flask('__name__')
@@ -21,6 +22,18 @@ mysql.init_app(app)
 #app = Flask(__name__) #placeholder for app.py
 
 Properties = Properties()
+
+# Check to see if user is logged in
+def is_logged_in(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Unauhtorized, Please login', 'danger')
+            return redirect(url_for('login'))
+    return wrap
+
 
 @app.route('/')
 def index():
@@ -86,7 +99,9 @@ def logout():
     # flash('You are now logged out', 'success') TODO: this doesnt work
     return render_template('logout.html')
 
+
 @app.route('/dashboard')
+@is_logged_in
 def dashboard():
     return render_template('dashboard.html')
 
@@ -121,6 +136,7 @@ def searchProperties():
     searchGuests = int(request.form['guests'])
     results = list(filter(lambda x: x['guests'] >= searchGuests, results))
     return render_template('properties.html', properties = results)
+
 
 if __name__ == '__main__':
     app.secret_key = 'CS4389isCool!'
