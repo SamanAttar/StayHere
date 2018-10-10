@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, flash, redirect, url_for, session, logging
+import os
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
@@ -6,10 +7,20 @@ from propertyData import Properties
 from RegisterForm import RegisterForm
 from PropertyForm import PropertyForm
 from functools import wraps
+from werkzeug.utils import secure_filename
+# TODO: Look into secure_filename for extra protection
+# http://flask.pocoo.org/docs/0.12/patterns/fileuploads/
 
 
 app = Flask('__name__')
 mysql  = MySQL()
+
+UPLOAD_FOLDER = ''
+
+# Prevents XSS -> so they arent able to upload HTML files
+# Also make sure to disallow .php files if the server executes them, but who has PHP installed on their server, right? :)
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 #config mySQL
 app.config['MYSQL_HOST'] = 'localhost'
@@ -160,6 +171,37 @@ def add_property():
 
         return redirect(url_for('dashboard'))
     return render_template('add_property.html', form=form)
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part', 'danger')
+            return redirect(request.url)
+
+        file = request.files['file']
+
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash('No selected file', 'danger')
+            return redirect(request.url)
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            flash('Yo, File saved!', 'success')
+            return redirect(url_for('dashboard', filename=filename))
+    return(redirect(url_for('dashboard')))
+
+# Verfiy filename is allowed
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 
 
 

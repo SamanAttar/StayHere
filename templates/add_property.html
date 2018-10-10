@@ -1,15 +1,15 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-  <h1>Add Property</h1>
-  {% from "includes/_formhelpers.html" import render_field %}
-  <form method="POST" action="">
-    <div class="form-group">
-      {{ render_field(form.title, class_="form-control") }}
-    </div>
-    <div class="form-group">
-      {{ render_field(form.body, class_="form-control", id="editor") }}
-    </div>
-    <p><input class="btn btn-primary" type="submit" value="Submit">
+<h1>Add Property</h1>
+{% from "includes/_formhelpers.html" import render_field %}
+<form method="POST" enctype=multipart/form-data action="{{ url_for('upload') }}">
+  <div class="form-group">
+    {{ render_field(form.title, class_="form-control") }}
+  </div>
+  <div class="form-group">
+    {{ render_field(form.body, class_="form-control", id="editor") }}
+  </div>
+  <div class="form-group">
+      <input type=file name=file>
   </form>
-{% endblock %}
