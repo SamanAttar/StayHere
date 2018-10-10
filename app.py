@@ -1,14 +1,10 @@
-
-from flask import Flask, render_template, request
-
 from flask import Flask, request, render_template, flash, redirect, url_for, session, logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
-
-from flask import Flask, render_template, request
-
 from propertyData import Properties
+from RegisterForm import RegisterForm
+from functools import wraps
 
 
 app = Flask('__name__')
@@ -26,6 +22,18 @@ mysql.init_app(app)
 #app = Flask(__name__) #placeholder for app.py
 
 Properties = Properties()
+
+# Check to see if user is logged in
+def is_logged_in(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Unauhtorized, Please login', 'danger')
+            return redirect(url_for('login'))
+    return wrap
+
 
 @app.route('/')
 def index():
@@ -85,9 +93,15 @@ def login():
 
     return render_template('signin.html')
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    # flash('You are now logged out', 'success') TODO: this doesnt work
+    return render_template('logout.html')
 
 
 @app.route('/dashboard')
+@is_logged_in
 def dashboard():
     return render_template('dashboard.html')
 
@@ -106,7 +120,6 @@ def signup():
 
         mysql.connection.commit()
 
-
         flash('You are now registered!', 'success')
         cur.close()
         #con.close()
@@ -123,17 +136,6 @@ def searchProperties():
     searchGuests = int(request.form['guests'])
     results = list(filter(lambda x: x['guests'] >= searchGuests, results))
     return render_template('properties.html', properties = results)
-
-
-class RegisterForm(Form):
-    name = StringField('Name', [validators.Length(min=1, max=50)])
-    username = StringField('Username', [validators.Length(min=4, max=25)])
-    email = StringField('Email', [validators.Length(min=6, max=50)])
-    password = PasswordField('Password', [
-        validators.DataRequired(),
-        validators.EqualTo('confirm', message = 'Password Does Not Match')
-    ])
-    confirm = PasswordField('Confrim Password')
 
 
 if __name__ == '__main__':

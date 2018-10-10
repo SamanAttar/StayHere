@@ -8,6 +8,16 @@
     {% from "includes/_formhelpers.html" import render_field %}
   <form method="POST" action="">
     <div class = "form-group">
+      <div class="control-group">
+        {% for subfield in form.user_type %}
+          <label class="radio">
+              {{ subfield }}
+              {{ subfield.label }}
+          </label>
+        {% endfor %}
+  </div>
+    <div>
+    <div class = "form-group">
       {{render_field(form.name, class_ = "form-control")}}
     </div>
     <div class = "form-group">
