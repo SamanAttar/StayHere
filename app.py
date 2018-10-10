@@ -56,7 +56,7 @@ def property(id):
     return render_template('property.html', id=id)
 
 # User login
-@app.route('/signin', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         # Get Form Fields
@@ -84,16 +84,17 @@ def login():
                 return redirect(url_for('dashboard'))
             else:
                 error = 'Invalid login'
-                return render_template('signin.html', error=error)
+                return render_template('login.html', error=error)
             # Close connection
             cur.close()
         else:
             error = 'Username not found'
-            return render_template('signin.html', error=error)
+            return render_template('login.html', error=error)
 
-    return render_template('signin.html')
+    return render_template('login.html')
 
 @app.route('/logout')
+@is_logged_in
 def logout():
     session.clear()
     # flash('You are now logged out', 'success') TODO: this doesnt work
@@ -123,7 +124,7 @@ def signup():
         flash('You are now registered!', 'success')
         cur.close()
         #con.close()
-        return redirect(url_for('signin'))
+        return redirect(url_for('login'))
     return render_template('signup.html', form = form)
 
 @app.route('/propertySearch', methods = ['POST'])
