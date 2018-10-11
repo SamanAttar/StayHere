@@ -1,7 +1,7 @@
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 
 class RegisterForm(Form):
-    user_type = RadioField('groupType', choices=[('GuestButton','Guest'),('HostButton','Host')])
+    groupType = RadioField('groupType', choices=[('GuestButton','Guest'),('HostButton','Host')])
     name = StringField('Name', [validators.Length(min=1, max=50)])
     username = StringField('Username', [validators.Length(min=4, max=25)])
     email = StringField('Email', [validators.Length(min=6, max=50)])
