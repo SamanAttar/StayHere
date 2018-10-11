@@ -24,9 +24,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 #config mySQL
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'stayhereuser'
+app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'CS4389isCool!'
-app.config['MYSQL_DB'] = 'StayHere'
+app.config['MYSQL_DB'] = 'StayHereDB'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor' #lets us treat the query as a dictionary, by default treats it as a tuple
 mysql.init_app(app)
 
@@ -126,10 +126,12 @@ def signup():
         email = form.email.data
         username = form.username.data
         password = sha256_crypt.encrypt(str(form.password.data))
+        groupType = form.groupType.data
+
 
         cur = mysql.connection.cursor()
 
-        cur.execute("INSERT INTO users(name, email, username, password) VALUES(%s, %s, %s, %s)", (name, email, username, password))
+        cur.execute("INSERT INTO users(name, email, username, password, groupType) VALUES(%s, %s, %s, %s, %s)", (name, email, username, password, group))
 
         mysql.connection.commit()
 
@@ -201,10 +203,6 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-
-
-
 if __name__ == '__main__':
     app.secret_key = 'CS4389isCool!'
-    app.run(port =5050, debug=True)
+     app.run(host="0.0.0.0", port =5000, debug=True)
