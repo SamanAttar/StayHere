@@ -35,6 +35,31 @@ mysql.init_app(app)
 
 Properties = Properties()
 
+def getgroupType():
+    if 'username' in session:
+        username = session['username']
+
+        cur = mysql.connection.cursor()
+
+        # Get user by username
+        groupTypeResult = cur.execute("SELECT groupType FROM users WHERE username = %s", [username])
+        groupTypeResult = str(cur.fetchall())
+
+        #check the value in the database
+        # DB stores as "GuestButton" or "HostButton"
+        if 'GuestButton' in groupTypeResult:
+
+            session["groupType"] = "guestUser"
+            session['iAmAGuest'] = True
+        else:
+            session["groupType"] = "hostUser"
+            session['iAmAGuest'] = False
+        return groupTypeResult
+    else:
+        session["groupType"] = "void"
+    return "void"
+
+
 # Check to see if user is logged in
 def is_logged_in(f):
     @wraps(f)
@@ -46,6 +71,36 @@ def is_logged_in(f):
             return redirect(url_for('login'))
     return wrap
 
+# Check to see if user is a guest in
+def guestRole(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+
+        #myString = 'I am logged in as a ' +  str(session['groupType'])
+        #flash(myString, 'danger')
+
+        if session['groupType']:
+            session['iAmAGuest'] = True
+            return f(*args, **kwargs)
+        else:
+            flash('Unauthorized. Only a Guest can access this!', 'danger')
+            return redirect(url_for('dashboard'))
+    return wrap
+
+# Check to see if user is a host
+def hostRole(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+    #myString = 'I am logged in as a ' +  str(session['groupType'])
+        #flash(myString, 'danger')
+
+        if session['groupType']:
+            session['iAmAGuest'] = False
+            return f(*args, **kwargs)
+        else:
+            flash('Unauthorized. Only a Host can access this!', 'danger')
+            return redirect(url_for('dashboard'))
+    return wrap
 
 @app.route('/')
 def index():
@@ -60,6 +115,7 @@ def signinbad():
     return render_template('signinbad.html')
 
 @app.route('/properties')
+@guestRole
 def properties():
     return render_template('properties.html', properties = Properties)
 
@@ -91,6 +147,8 @@ def login():
                 # Passed
                 session['logged_in'] = True
                 session['username'] = username
+                #session['groupType'] = True
+
 
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
@@ -112,11 +170,13 @@ def logout():
     # flash('You are now logged out', 'success') TODO: this doesnt work
     return render_template('logout.html')
 
-
 @app.route('/dashboard')
-@is_logged_in
 def dashboard():
+    #if userIsGuest:
+    str = getgroupType()
     return render_template('dashboard.html')
+#    else:
+    #    return render_template('dashboard_host.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -155,6 +215,7 @@ def searchProperties():
 
 @app.route('/add_property', methods=['GET', 'POST'])
 @is_logged_in
+@hostRole
 def add_property():
     form = PropertyForm(request.form)
     if request.method == 'POST' and form.validate():

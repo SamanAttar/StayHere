@@ -2,9 +2,12 @@
 
 {% block body %}
   <div class="jumbotron text-center">
-    <h1> Dashboard </h1>
+    <h1> {{session.groupType}} Dashboard </h1>
     <h3> Welcome {{session.username}} </h3>
     <hr>
-    <a class="btn btn-success" href='/add_property'>Add Property</a>
+    {% if not session.iAmAGuest %}
+      <a class="btn btn-success" href='/add_property'> Add a New Property</a>
+      <a class="btn btn-success" href='/view_property'> View your Properties</a>
+    {%  endif %}
   <div>
 {% endblock %}
