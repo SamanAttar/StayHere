@@ -1,19 +1,18 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+
   <div class="jumbotron text-center">
     <h1>Welcome To StayHere</h1>
-	<form action="signup.html">
-		<input type="submit" value="Sign Up" />
-	</form>
-	<form action="login.html">
-		<input type="submit" value="Log in" />
-	</form>
-	<form action="properties.html">
-		<input type="submit" value="Continue as Guest" />
-	</form>
 
-  <div class="continer col-6 bg-white">
+  <div style="margin: 20px;">
+    <a class="btn btn-primary btn-lg" href='/signup'> Sign Up</a>
+    <a class="btn btn-primary btn-lg" href='/signin'> Log In</a>
+    <a class="btn btn-primary btn-lg" href='/home'> Continue As Guest</a>
+  </div>
+
+<div>
+  <div class="continer col-12 bg-white">
     <h2>Book unique homes and experiences.</h2>
     <form class="text-left form row " action="/propertySearch" method="post">
       <div class="form-group col-12">
@@ -37,5 +36,8 @@
        </div>
     </form>
   </div>
+</div>
+
+</div>
 
 {% endblock %}
