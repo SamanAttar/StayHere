@@ -83,6 +83,7 @@ def guestRole(f):
             session['iAmAGuest'] = True
             return f(*args, **kwargs)
         else:
+            session['iAmAGuest'] = False
             flash('Unauthorized. Only a Guest can access this!', 'danger')
             return redirect(url_for('dashboard'))
     return wrap
@@ -98,6 +99,7 @@ def hostRole(f):
             session['iAmAGuest'] = False
             return f(*args, **kwargs)
         else:
+            session['iAmAGuest'] = True
             flash('Unauthorized. Only a Host can access this!', 'danger')
             return redirect(url_for('dashboard'))
     return wrap
@@ -167,19 +169,18 @@ def login():
 @is_logged_in
 def logout():
     session.clear()
-    # flash('You are now logged out', 'success') TODO: this doesnt work
     return render_template('logout.html')
 
 @app.route('/dashboard')
 def dashboard():
-    #if userIsGuest:
+    # Verify the Group Type to see if host or guest
     str = getgroupType()
     return render_template('dashboard.html')
-#    else:
-    #    return render_template('dashboard_host.html')
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    session.clear()
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
         name = form.name.data
