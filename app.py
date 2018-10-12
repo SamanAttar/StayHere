@@ -75,17 +75,20 @@ def is_logged_in(f):
 def guestRole(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-
         #myString = 'I am logged in as a ' +  str(session['groupType'])
         #flash(myString, 'danger')
-
-        if session['groupType']:
-            session['iAmAGuest'] = True
-            return f(*args, **kwargs)
+        if 'groupType' in str(session):
+            if session['groupType']:
+                session['iAmAGuest'] = True
+                return f(*args, **kwargs)
+            else:
+                session['iAmAGuest'] = False
+                flash('Unauthorized. Only a Guest can access this!', 'danger')
+                return redirect(url_for('dashboard'))
         else:
+            session['groupType'] = "User Not Signed In"
             session['iAmAGuest'] = False
-            flash('Unauthorized. Only a Guest can access this!', 'danger')
-            return redirect(url_for('dashboard'))
+        return redirect(url_for('dashboard'))
     return wrap
 
 # Check to see if user is a host
