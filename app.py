@@ -175,6 +175,7 @@ def logout():
     return render_template('logout.html')
 
 @app.route('/dashboard')
+@is_logged_in
 def dashboard():
     # Verify the Group Type to see if host or guest
     str = getgroupType()
