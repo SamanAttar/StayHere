@@ -121,6 +121,7 @@ def signinbad():
 
 @app.route('/properties')
 @guestRole
+@is_logged_in
 def properties():
     return render_template('properties.html', properties = Properties)
 
@@ -207,7 +208,7 @@ def signup():
     return render_template('signup.html', form = form)
 
 @app.route('/propertySearch', methods = ['POST'])
-def searchProperties():
+def propertySearch():
     # eventually query db on location, guests, and maybe checkin and checkout dates
     results = Properties
     searchLocation = request.form['location']
@@ -216,6 +217,10 @@ def searchProperties():
     searchGuests = int(request.form['guests'])
     results = list(filter(lambda x: x['guests'] >= searchGuests, results))
     return render_template('properties.html', properties = results)
+
+@app.route('/searchProperties', methods=['GET', 'POST'])
+def searchProperties():
+    return render_template('property_search.html')
 
 
 @app.route('/add_property', methods=['GET', 'POST'])
