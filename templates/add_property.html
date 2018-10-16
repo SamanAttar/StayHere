@@ -11,9 +11,15 @@
     {{ render_field(form.body, class_="form-control", id="editor") }}
   </div>
   <div class="form-group">
+    {{ render_field(form.location, class_="form-control", id="location")}}
+  </div>
+  <div class="form-group">
+    {{ render_field(form.guests, class_="form-control", id="guests")}}
+  </div>
+  <div class="form-group">
       <input type=file name=file>
   </div>
-  <input class="btn btn-primary" type="submit" value="Submit"> 
+  <input class="btn btn-primary" type="submit" value="Submit">
   </form>
 
 {% endblock%}

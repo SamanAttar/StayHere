@@ -4,6 +4,7 @@ from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
 from propertyData import Properties
+from Property import Property
 from RegisterForm import RegisterForm
 from PropertyForm import PropertyForm
 from functools import wraps
@@ -123,7 +124,18 @@ def signinbad():
 @guestRole
 @is_logged_in
 def properties():
-    return render_template('properties.html', properties = Properties)
+    cur = mysql.connection.cursor()
+    cur.execute("""SELECT property_id, user_id, title, property_description, location, guests
+                    FROM Properties""")
+
+    data = cur.fetchall()
+    matching_properties = []
+    for property in data:
+        newProperty = Property(id = property['property_id'], user_id = property['user_id'], title = property['title'],
+                property_description = property['property_description'], location = property['location'], guests = property['guests'])
+        matching_properties.append(newProperty)
+
+    return render_template('properties.html', properties = matching_properties)
 
 @app.route('/property/<string:id>')
 def property(id):
@@ -154,7 +166,6 @@ def login():
                 session['logged_in'] = True
                 session['username'] = username
                 #session['groupType'] = True
-
 
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
@@ -209,23 +220,28 @@ def signup():
 
 @app.route('/propertySearch', methods = ['POST'])
 def propertySearch():
-    # eventually query db on location, guests, and maybe checkin and checkout dates
-    results = Properties
+    cur = mysql.connection.cursor()
     searchLocation = request.form['location']
-    if searchLocation is not None and searchLocation != '':
-        results = list(filter(lambda x: searchLocation.lower() in x['location'].lower(), results))
     searchGuests = int(request.form['guests'])
-    results = list(filter(lambda x: x['guests'] >= searchGuests, results))
-    return render_template('properties.html', properties = results)
+    cur.execute("""SELECT property_id, user_id, title, property_description, location, guests
+                    FROM Properties
+                    WHERE LOWER(location) like CONCAT('%%', %s, '%%') AND guests <= %s""", (searchLocation.lower(), searchGuests))
+
+    data = cur.fetchall()
+    matching_properties = []
+    for property in data:
+        newProperty = Property(id = property['property_id'], user_id = property['user_id'], title = property['title'],
+                property_description = property['property_description'], location = property['location'], guests = property['guests'])
+        matching_properties.append(property)
+
+    return render_template('properties.html', properties = matching_properties)
 
 @app.route('/searchProperties', methods=['GET', 'POST'])
 def searchProperties():
     return render_template('property_search.html')
 
-
+# this isn't actually being used
 @app.route('/add_property', methods=['GET', 'POST'])
-@is_logged_in
-@hostRole
 def add_property():
     form = PropertyForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -233,7 +249,6 @@ def add_property():
         body = form.body.data
 
         #create cur cursor
-
         #execute cur cursor into articles table with title, body, author
 
         #commit to DB:
@@ -245,9 +260,28 @@ def add_property():
         return redirect(url_for('dashboard'))
     return render_template('add_property.html', form=form)
 
+
 @app.route('/upload', methods=['GET', 'POST'])
+@is_logged_in
+@hostRole
 def upload():
-    if request.method == 'POST':
+    form = PropertyForm(request.form)
+    if request.method == 'POST' and form.validate():
+
+        # add property to DB
+        title = form.title.data
+        body = form.body.data
+        location = form.location.data
+        guests = form.guests.data
+        #create cur cursor
+        cur = mysql.connection.cursor()
+        cur.execute("""SELECT id FROM users WHERE username = %s""", [session['username']])
+        data = cur.fetchone()
+        user_id = data['id']
+        cur.execute("""INSERT INTO Properties (user_id, title, property_description, location, guests)
+                VALUES (%s, %s, %s, %s, %s)""", (user_id, title, body, location, guests))
+        mysql.connection.commit()
+        cur.close()
 
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -267,6 +301,8 @@ def upload():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             flash('Yo, File saved!', 'success')
             return redirect(url_for('dashboard', filename=filename))
+    if request.method == 'POST' and not form.validate():
+        return render_template('add_property.html', form=form)
     return(redirect(url_for('dashboard')))
 
 # Verfiy filename is allowed
