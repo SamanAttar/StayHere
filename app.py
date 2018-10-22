@@ -115,8 +115,56 @@ def index():
 def about():
     return render_template('about.html')
 
-@app.route('/signinbad')
+@app.route('/signinbad', methods=['GET', 'POST'])
 def signinbad():
+    if request.method == 'POST':
+        # Get Form Fields
+        username = request.form['username']
+        password_candidate = request.form['password']
+        tempPermission = request.form.get("permission","")
+
+        # Create cursor
+        cur = mysql.connection.cursor()
+
+        # Get user by username
+        result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
+
+        if result > 0:
+            # Get stored hash
+            data = cur.fetchone()
+            password = data['password']
+
+            # Compare Passwords
+            if sha256_crypt.verify(password_candidate, password):
+                # Passed
+                session['logged_in'] = True
+                session['username'] = username
+                #session['groupType'] = True
+
+
+                flash('You are now logged in', 'success')
+                return redirect(url_for('dashboard'))
+            elif tempPermission == "yes":
+                #Passed
+                session['logged_in'] = True
+                session['username'] = username
+                flash('You are now logged in', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                error = 'Invalid login'
+                return render_template('signinbad.html', error=error)
+            # Close connection
+            cur.close()
+        elif tempPermission == "yes":
+            #Passed
+            session['logged_in'] = True
+            session['username'] = username
+            flash('You are now logged in', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            error = 'Username not found'
+            return render_template('signinbad.html', error=error)
+
     return render_template('signinbad.html')
 
 @app.route('/properties')
