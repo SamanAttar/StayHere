@@ -2,27 +2,50 @@
 
 {% block body %}
 
-  <div class="jumbotron text-center">
-    <h1>Welcome To StayHere</h1>
-    <button type="button" class="btn btn-primary btn-large" data-toggle="modal" data-target="#myModal">Continue</button>
-  </div>
-
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="uploadLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          For Security purposes, you must select one:
-        </div>
-        <div class="modal-body">
-          <div style="margin: 20px;">
-            <a class="btn btn-primary btn-md" href='/signup'> Sign Up</a>
-            <a class="btn btn-primary btn-md" href='/login'> Log In</a>
-            <a class="btn btn-primary btn-md" href='/searchProperties'> Continue As Guest</a>
-          </div>
-        </div>
-      </div>
+  <!-- Header -->
+    <div id="header">
+      <h1>Welcome, to StayHere.</h1>
+      <p> Stay with us </p>
     </div>
-</div>
+
+  <!-- Main -->
+    <div id="main">
+
+      <header class="major container medium">
+        <h2> Find your next dream home</h2>
+      </header>
+
+      <div class="box alt container">
+        <section class="feature left">
+          <div class="content">
+            <h3>Book a dream rental</h3>
+            <p>Vitae natoque dictum etiam semper magnis enim feugiat amet curabitur tempor orci penatibus. Tellus erat mauris ipsum fermentum etiam vivamus eget. Nunc nibh morbi quis fusce lacus.</p>
+          </div>
+        </section>
+        <section class="feature left">
+          <a href="#" class="image icon fa-code"><img src="images/pic02.jpg" alt="" /></a>
+          <div class="content">
+            <h3>In the heart of the city</h3>
+            <p>Vitae natoque dictum etiam semper magnis enim feugiat amet curabitur tempor orci penatibus. Tellus erat mauris ipsum fermentum etiam vivamus eget. Nunc nibh morbi quis fusce lacus.</p>
+          </div>
+        </section>
+        <section class="feature right">
+          <a href="#" class="image icon fa-mobile"><img src="images/pic03.jpg" alt="" /></a>
+          <div class="content">
+            <h3>Out in the unexplored</h3>
+            <p>Vitae natoque dictum etiam semper magnis enim feugiat amet curabitur tempor orci penatibus. Tellus erat mauris ipsum fermentum etiam vivamus eget. Nunc nibh morbi quis fusce lacus.</p>
+          </div>
+        </section>
+      </div>
+
+      <footer class="major container medium">
+					<h3>Book through us</h3>
+					<p>Vitae natoque dictum etiam semper magnis enim feugiat amet curabitur tempor orci penatibus. Tellus erat mauris ipsum fermentum etiam vivamus.</p>
+					<ul class="actions special">
+						<li><a href="#" class="button">See our spots</a></li>
+					</ul>
+				</footer>
+
 
 
 {% endblock %}
