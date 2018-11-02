@@ -293,6 +293,18 @@ def add_property():
         return redirect(url_for('dashboard'))
     return render_template('add_property.html', form=form)
 
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    currentUserId = session['userId']
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT name, email, username FROM users WHERE id = %s", [currentUserId])
+    result = cur.fetchone()
+    cur.close()
+
+    with app.open_resource('./static/json/particleJSON.json') as f:
+        json_data = json.load(f)
+    return render_template('profile.html', result=result, json_data=json_data)
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
