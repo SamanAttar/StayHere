@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, flash, redirect, url_for, session, logging
 import os
+import time
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
@@ -31,6 +32,7 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor' #lets us treat the query as a dic
 mysql.init_app(app)
 
 MAX_LOGIN_ATTEMPTS = 5
+INACTIVITY_DUARTION = 120   # log user out after this many seconds of inactivity
 
 
 #app = Flask(__name__) #placeholder for app.py
@@ -67,7 +69,11 @@ def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
         if 'logged_in' in session:
-            return f(*args, **kwargs)
+            if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+                return f(*args, **kwargs)
+            else:
+                flash('Your session has expired, Please login', 'danger')
+                return redirect(url_for('login'))
         else:
             flash('Unauhtorized, Please login', 'danger')
             return redirect(url_for('login'))
@@ -111,10 +117,14 @@ def hostRole(f):
 
 @app.route('/')
 def index():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     return render_template('home.html')
 
 @app.route('/about')
 def about():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     return render_template('about.html')
 
 @app.route('/signinbad', methods=['GET', 'POST'])
@@ -142,7 +152,7 @@ def signinbad():
                 session['logged_in'] = True
                 session['username'] = username
                 #session['groupType'] = True
-
+                session['last_operation_time'] = time.time()
 
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
@@ -150,6 +160,7 @@ def signinbad():
                 #Passed
                 session['logged_in'] = True
                 session['username'] = username
+                session['last_operation_time'] = time.time()
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
             else:
@@ -161,6 +172,7 @@ def signinbad():
             #Passed
             session['logged_in'] = True
             session['username'] = username
+            session['last_operation_time'] = time.time()
             flash('You are now logged in', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -173,10 +185,14 @@ def signinbad():
 @guestRole
 @is_logged_in
 def properties():
+    if 'last_operation_time' in session:
+        session['last_operation_time'] = time.time()
     return render_template('properties.html', properties = Properties)
 
 @app.route('/property/<string:id>')
 def property(id):
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     return render_template('property.html', id=id)
 
 # User login
@@ -211,7 +227,7 @@ def login():
                 session['username'] = username
                 session.pop('bad_login_count', None)
                 #session['groupType'] = True
-
+                session['last_operation_time'] = time.time()
 
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
@@ -249,6 +265,8 @@ def logout():
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
+    if 'last_operation_time' in session:
+        session['last_operation_time'] = time.time()
     # Verify the Group Type to see if host or guest
     str = getgroupType()
     return render_template('dashboard.html')
@@ -280,6 +298,8 @@ def signup():
 
 @app.route('/propertySearch', methods = ['POST'])
 def propertySearch():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     # eventually query db on location, guests, and maybe checkin and checkout dates
     results = Properties
     searchLocation = request.form['location']
@@ -291,6 +311,8 @@ def propertySearch():
 
 @app.route('/searchProperties', methods=['GET', 'POST'])
 def searchProperties():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     return render_template('property_search.html')
 
 
@@ -298,6 +320,8 @@ def searchProperties():
 @is_logged_in
 @hostRole
 def add_property():
+    if 'last_operation_time' in session:
+        session['last_operation_time'] = time.time()
     form = PropertyForm(request.form)
     if request.method == 'POST' and form.validate():
         title = form.title.data
@@ -318,6 +342,8 @@ def add_property():
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     currentUserId = session['userId']
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT name, email, username FROM users WHERE id = %s", [currentUserId])
@@ -330,6 +356,8 @@ def profile():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     if request.method == 'POST':
 
         # check if the post request has the file part
