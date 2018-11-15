@@ -72,6 +72,7 @@ def is_logged_in(f):
             if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
                 return f(*args, **kwargs)
             else:
+                session.clear()
                 flash('Your session has expired, Please login', 'danger')
                 return redirect(url_for('login'))
         else:
