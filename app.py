@@ -30,6 +30,8 @@ app.config['MYSQL_DB'] = 'StayHereDB'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor' #lets us treat the query as a dictionary, by default treats it as a tuple
 mysql.init_app(app)
 
+MAX_LOGIN_ATTEMPTS = 5
+
 
 #app = Flask(__name__) #placeholder for app.py
 
@@ -181,6 +183,12 @@ def property(id):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+
+        # check if user is locked out
+        if 'bad_login_count' in session and session['bad_login_count'] >= MAX_LOGIN_ATTEMPTS:
+            error = 'You are currently locked out.  Try again tomorrow.'
+            return render_template('login.html', error=error)
+
         # Get Form Fields
         username = request.form['username']
         password_candidate = request.form['password']
@@ -201,21 +209,36 @@ def login():
                 # Passed
                 session['logged_in'] = True
                 session['username'] = username
+                session.pop('bad_login_count', None)
                 #session['groupType'] = True
 
 
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
             else:
-                error = 'Invalid login'
+                if increment_bad_login_count():
+                    error = 'Invalid login.  You are now locked out.'
+                else:
+                    error = 'Invalid login'
                 return render_template('login.html', error=error)
             # Close connection
             cur.close()
         else:
-            error = 'Username not found'
+            if increment_bad_login_count():
+                error = 'Username not found. You are now locked out.'
+            else:
+                error = 'Username not found'
             return render_template('login.html', error=error)
 
     return render_template('login.html')
+
+def increment_bad_login_count():
+    if 'bad_login_count' not in session:
+        session['bad_login_count'] = 1
+    else:
+        session['bad_login_count'] += 1
+    return session['bad_login_count'] >= MAX_LOGIN_ATTEMPTS
+
 
 @app.route('/logout')
 @is_logged_in
