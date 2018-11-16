@@ -11,7 +11,6 @@ from werkzeug.utils import secure_filename
 # TODO: Look into secure_filename for extra protection
 # http://flask.pocoo.org/docs/0.12/patterns/fileuploads/
 
-
 app = Flask('__name__')
 mysql  = MySQL()
 
@@ -29,9 +28,6 @@ app.config['MYSQL_PASSWORD'] = 'CS4389isCool!'
 app.config['MYSQL_DB'] = 'StayHereDB'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor' #lets us treat the query as a dictionary, by default treats it as a tuple
 mysql.init_app(app)
-
-
-#app = Flask(__name__) #placeholder for app.py
 
 Properties = Properties()
 
@@ -58,7 +54,6 @@ def getgroupType():
     else:
         session["groupType"] = "void"
     return "void"
-
 
 # Check to see if user is logged in
 def is_logged_in(f):
@@ -202,8 +197,7 @@ def login():
                 session['logged_in'] = True
                 session['username'] = username
                 #session['groupType'] = True
-
-
+                
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
             else:
@@ -288,23 +282,49 @@ def add_property():
     if request.method == 'POST' and form.validate():
         title = form.title.data
         body = form.body.data
+        cur = mysql.connection.cursor()
+        user_id = cur.execute("SELECT id from users WHERE username = %s", session['username'])
+        user_id = cur.fetchone()
+        cur.close()
+        print("From add propety Id")
+        print (user_id)
 
-        #create cur cursor
-
-        #execute cur cursor into articles table with title, body, author
-
-        #commit to DB:
-        #close connection
-
-        #flash message
-        flash('Article Created', 'success')
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO Properties(title, body, user_id) VALUES(%s, %s, %s)", (title, body, user_id))
+        mysql.connection.commit()
+        cur.close()
+        flash('Property Created', 'success')
 
         return redirect(url_for('dashboard'))
     return render_template('add_property.html', form=form)
 
+@app.route('/view_property', methods=['GET', 'POST'])
+@hostRole
+def view_files():
+
+    # TODO either encrypt and create a new session token every few minutes
+    userName = session['username']
+    print ("User name is")
+    print (userName)
+
+    cur = mysql.connection.cursor()
+    userId = cur.execute("SELECT id from users WHERE username = %s", userName)
+    userId = cur.fetchone()
+    cur.close()
+
+    print ("User ID is")
+    print (userId)
+
+
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT title, property_description from Properties WHERE user_id = %s", [userId])
+    rows = cur.fetchall()
+    cur.close()
+    return render_template('view_property.html', rows=rows)
+
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
-    currentUserId = session['userId']
+    currentUserId = session['username']
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT name, email, username FROM users WHERE id = %s", [currentUserId])
     result = cur.fetchone()
