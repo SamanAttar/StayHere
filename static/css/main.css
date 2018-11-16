@@ -10,13 +10,16 @@
   background-repeat: no-repeat;
   background-size: cover;
 }
-.jumbotron {
+.mainJumbo {
   padding-top: 40%;
   background: none
 }
 
 .welcomeText {
   color: #ceb3b3;
+  position: relative;
+  padding-top: 10%;
+  top: 30%;
 }
 
 .sectionHome {
@@ -24,13 +27,9 @@
   margin-bottom: 0px;
   margin-top: 0px;
 }
+
 .sectionHome2 {
   background-color: #afafaf;
   margin-bottom: 0px;
   margin-top: 0px;
-}
-
-p {
-  margin-bottom: 0em;
-  margin-left: 15%
 }
