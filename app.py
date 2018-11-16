@@ -179,7 +179,7 @@ def signinbad():
             app.logger.info('%s logged in successfully', username)
             return redirect(url_for('dashboard'))
         else:
-            error = 'Username and/or Password was innorrect'
+            error = 'Username and/or Password was inncorrect'
             return render_template('signinbad.html', error=error)
 
     return render_template('signinbad.html')
@@ -243,9 +243,9 @@ def login():
             cur.close()
         else:
             if increment_bad_login_count():
-                error = 'Username and/or Password was innorrect too many times. You are now locked out.'
+                error = 'Username and/or Password was inncorrect too many times. You are now locked out.'
             else:
-                error = 'Username and/or Password was innorrect'
+                error = 'Username and/or Password was inncorrect'
             return render_template('login.html', error=error)
 
     return render_template('login.html')
@@ -319,7 +319,7 @@ def propertySearch():
         return render_template('no_property.html')
     else:
         cur = mysql.connection.cursor()
-        result = cur.execute("SELECT title, property_description from Properties")
+        result = cur.execute("SELECT title, property_description,location from Properties")
         rows = cur.fetchall()
         cur.close()
         return render_template('properties.html', rows = rows)
