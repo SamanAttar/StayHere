@@ -197,7 +197,7 @@ def login():
                 session['logged_in'] = True
                 session['username'] = username
                 #session['groupType'] = True
-                
+
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
             else:
@@ -273,34 +273,41 @@ def propertySearch():
 def searchProperties():
     return render_template('property_search.html')
 
-
 @app.route('/add_property', methods=['GET', 'POST'])
 @is_logged_in
 @hostRole
 def add_property():
     form = PropertyForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
+        print("inside add method")
         title = form.title.data
         body = form.body.data
         cur = mysql.connection.cursor()
-        user_id = cur.execute("SELECT id from users WHERE username = %s", session['username'])
-        user_id = cur.fetchone()
+        userName = session['username']
+        print("about to execute select command")
+        userId = cur.execute("SELECT id FROM users WHERE username = %s", [userName])
+        print("done with exec")
+        userId = cur.fetchone()
+        print("done with fetch")
+        user_id = int(userId["id"])
+
         cur.close()
-        print("From add propety Id")
-        print (user_id)
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO Properties(title, body, user_id) VALUES(%s, %s, %s)", (title, body, user_id))
-        mysql.connection.commit()
-        cur.close()
-        flash('Property Created', 'success')
+        print("about to exec the properties")
+        cur.execute("INSERT INTO Properties(title, property_description, guests, user_id) VALUES(%s, %s, %s, %s)", (title, body, 0, user_id))
 
+        mysql.connection.commit()
+        print("done with conn commit")
+        cur.close()
+
+        flash('Property Created', 'success')
         return redirect(url_for('dashboard'))
     return render_template('add_property.html', form=form)
 
 @app.route('/view_property', methods=['GET', 'POST'])
 @hostRole
-def view_files():
+def view_property():
 
     # TODO either encrypt and create a new session token every few minutes
     userName = session['username']
@@ -308,16 +315,19 @@ def view_files():
     print (userName)
 
     cur = mysql.connection.cursor()
-    userId = cur.execute("SELECT id from users WHERE username = %s", userName)
+    userId = cur.execute("SELECT id FROM users WHERE username = %s", [userName])
     userId = cur.fetchone()
+
+    val = int(userId["id"])
+
     cur.close()
 
     print ("User ID is")
-    print (userId)
+    print (val)
 
 
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT title, property_description from Properties WHERE user_id = %s", [userId])
+    result = cur.execute("SELECT title, property_description from Properties WHERE user_id = %s", [val])
     rows = cur.fetchall()
     cur.close()
     return render_template('view_property.html', rows=rows)
