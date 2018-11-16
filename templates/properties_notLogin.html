@@ -2,22 +2,15 @@
 
 {% block body %}
 <h1> TODO: Fix This issue </h1>
-<br>
   <h1> Properties </h1>
     <ul class="list-group">
       {% for property in properties %}
         <li class="list-group-item"><a href="/property/{{property.id}}">{{property.title}}</a></li>
       {% endfor %}
     </ul>
+    <br><br>
+    <h3> Login to see more! </h3>
+    <form action = "/login">
+           <input class="btn btn-primary" type="submit" value="Login">
+    </form>
 {% endblock %}
-
-
-
-<!--
-<h1> Properties </h1>
-  <ul class="list-group">
-    {% for property in properties %}
-      <li class="list-group-item"><a href="properties/{{properties.id}}">{{property.title}}</a></li>
-    {% endfor %}
-  </ul>
--->

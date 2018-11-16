@@ -262,9 +262,18 @@ def propertySearch():
     searchLocation = request.form['location']
     if searchLocation is not None and searchLocation != '':
         results = list(filter(lambda x: searchLocation.lower() in x['location'].lower(), results))
-    searchGuests = int(request.form['guests'])
+    if (request.form['guests'] == ''):
+        searchGuests = 0
+    else:
+        searchGuests = int(request.form['guests'])
     results = list(filter(lambda x: x['guests'] >= searchGuests, results))
-    return render_template('properties.html', properties = results)
+    if (not 'logged_in' in session and len(results) > 0):
+        del results[1:]
+        return render_template('properties_notLogin.html', properties = results)
+    elif (len(results) == 0):
+        return render_template('no_property.html')
+    else:
+        return render_template('properties.html', properties = results)
 
 @app.route('/searchProperties', methods=['GET', 'POST'])
 def searchProperties():
