@@ -74,7 +74,7 @@ def is_logged_in(f):
                 flash('Your session has expired, Please login', 'danger')
                 return redirect(url_for('login'))
         else:
-            flash('Unauhtorized, Please login', 'danger')
+            flash('Unauthorized, Please login', 'danger')
             return redirect(url_for('login'))
     return wrap
 
@@ -161,9 +161,11 @@ def signinbad():
                 session['username'] = username
                 session['last_operation_time'] = time.time()
                 flash('You are now logged in', 'success')
+                app.logger.info('%s logged in successfully', username)
                 return redirect(url_for('dashboard'))
             else:
                 error = 'Invalid login'
+                app.logger.info('%s login attempt failed', username)
                 return render_template('signinbad.html', error=error)
             # Close connection
             cur.close()
@@ -173,6 +175,7 @@ def signinbad():
             session['username'] = username
             session['last_operation_time'] = time.time()
             flash('You are now logged in', 'success')
+            app.logger.info('%s logged in successfully', username)
             return redirect(url_for('dashboard'))
         else:
             error = 'Username not found'
@@ -226,10 +229,7 @@ def login():
                 session['username'] = username
                 session.pop('bad_login_count', None)
                 #session['groupType'] = True
-
                 session['last_operation_time'] = time.time()
-
-
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
             else:
@@ -433,4 +433,6 @@ def allowed_file(filename):
 
 if __name__ == '__main__':
     app.secret_key = 'CS4389isCool!'
-    app.run(host="0.0.0.0", port =5000, debug=True)
+    import logging
+    logging.basicConfig(filename='app.log',level=logging.INFO)
+    app.run(host="0.0.0.0", port =5000, debug=False)
