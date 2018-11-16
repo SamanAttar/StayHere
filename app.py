@@ -226,10 +226,9 @@ def login():
                 session['username'] = username
                 session.pop('bad_login_count', None)
                 #session['groupType'] = True
-<<<<<<< HEAD
-=======
+
                 session['last_operation_time'] = time.time()
->>>>>>> origin/master
+
 
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
