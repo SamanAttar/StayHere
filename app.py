@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, flash, redirect, url_for, session, logging
 import os
+import logging
 import time
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
@@ -438,6 +439,5 @@ def allowed_file(filename):
 
 if __name__ == '__main__':
     app.secret_key = 'CS4389isCool!'
-    import logging
     logging.basicConfig(filename='app.log',level=logging.INFO)
-    app.run(host="0.0.0.0", port =5000, debug=False)
+    app.run(host="0.0.0.0", port =5000, debug=True)
