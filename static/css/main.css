@@ -1,0 +1,36 @@
+.mainImage {
+
+  background-image: url("https://images.unsplash.com/photo-1416331108676-a22ccb276e35?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=eef2ec2eb92ca06d154df5147fbae1fe&auto=format&fit=crop&w=1347&q=80");
+  /* Full height */
+  /* Full height */
+  height: 50%;
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.jumbotron {
+  padding-top: 40%;
+  background: none
+}
+
+.welcomeText {
+  color: #ceb3b3;
+}
+
+.sectionHome {
+  background-color: #ceb3b3;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+.sectionHome2 {
+  background-color: #afafaf;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+p {
+  margin-bottom: 0em;
+  margin-left: 15%
+}
