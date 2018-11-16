@@ -1,6 +1,19 @@
-{% for row in rows %}
-  <tr>
-    <td> {{row["title"]}}  </td>
-    <td> {{ row["property_description"] }}</td>
-  </tr>
-{% endfor %}
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="fluid-container">
+  <table style="width:100%">
+    <tr>
+      <th> Property </th>
+      <th> Description </th>
+    </tr>
+    {% for row in rows %}
+      <tr>
+        <td> {{ row["title"] }}  </td>
+        <td> {{ row["property_description"] }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}

@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, flash, redirect, url_for, session, logging
 import os
+import time
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
@@ -28,6 +29,12 @@ app.config['MYSQL_PASSWORD'] = 'CS4389isCool!'
 app.config['MYSQL_DB'] = 'StayHereDB'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor' #lets us treat the query as a dictionary, by default treats it as a tuple
 mysql.init_app(app)
+
+MAX_LOGIN_ATTEMPTS = 5
+INACTIVITY_DUARTION = 120   # log user out after this many seconds of inactivity
+
+
+#app = Flask(__name__) #placeholder for app.py
 
 Properties = Properties()
 
@@ -60,7 +67,12 @@ def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
         if 'logged_in' in session:
-            return f(*args, **kwargs)
+            if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+                return f(*args, **kwargs)
+            else:
+                session.clear()
+                flash('Your session has expired, Please login', 'danger')
+                return redirect(url_for('login'))
         else:
             flash('Unauthorized, Please login', 'danger')
             return redirect(url_for('login'))
@@ -104,10 +116,14 @@ def hostRole(f):
 
 @app.route('/')
 def index():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     return render_template('home.html')
 
 @app.route('/about')
 def about():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     return render_template('about.html')
 
 @app.route('/signinbad', methods=['GET', 'POST'])
@@ -135,7 +151,7 @@ def signinbad():
                 session['logged_in'] = True
                 session['username'] = username
                 #session['groupType'] = True
-
+                session['last_operation_time'] = time.time()
 
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
@@ -143,6 +159,7 @@ def signinbad():
                 #Passed
                 session['logged_in'] = True
                 session['username'] = username
+                session['last_operation_time'] = time.time()
                 flash('You are now logged in', 'success')
                 app.logger.info('%s logged in successfully', username)
                 return redirect(url_for('dashboard'))
@@ -156,6 +173,7 @@ def signinbad():
             #Passed
             session['logged_in'] = True
             session['username'] = username
+            session['last_operation_time'] = time.time()
             flash('You are now logged in', 'success')
             app.logger.info('%s logged in successfully', username)
             return redirect(url_for('dashboard'))
@@ -169,16 +187,26 @@ def signinbad():
 @guestRole
 @is_logged_in
 def properties():
+    if 'last_operation_time' in session:
+        session['last_operation_time'] = time.time()
     return render_template('properties.html', properties = Properties)
 
 @app.route('/property/<string:id>')
 def property(id):
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     return render_template('property.html', id=id)
 
 # User login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+
+        # check if user is locked out
+        if 'bad_login_count' in session and session['bad_login_count'] >= MAX_LOGIN_ATTEMPTS:
+            error = 'You are currently locked out.  Try again tomorrow.'
+            return render_template('login.html', error=error)
+
         # Get Form Fields
         username = request.form['username']
         password_candidate = request.form['password']
@@ -199,19 +227,35 @@ def login():
                 # Passed
                 session['logged_in'] = True
                 session['username'] = username
+                session.pop('bad_login_count', None)
                 #session['groupType'] = True
+                session['last_operation_time'] = time.time()
                 flash('You are now logged in', 'success')
                 return redirect(url_for('dashboard'))
             else:
-                error = 'Invalid login'
+                if increment_bad_login_count():
+                    error = 'Invalid login.  You are now locked out.'
+                else:
+                    error = 'Invalid login'
                 return render_template('login.html', error=error)
             # Close connection
             cur.close()
         else:
-            error = 'Username not found'
+            if increment_bad_login_count():
+                error = 'Username not found. You are now locked out.'
+            else:
+                error = 'Username not found'
             return render_template('login.html', error=error)
 
     return render_template('login.html')
+
+def increment_bad_login_count():
+    if 'bad_login_count' not in session:
+        session['bad_login_count'] = 1
+    else:
+        session['bad_login_count'] += 1
+    return session['bad_login_count'] >= MAX_LOGIN_ATTEMPTS
+
 
 @app.route('/logout')
 @is_logged_in
@@ -222,6 +266,8 @@ def logout():
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
+    if 'last_operation_time' in session:
+        session['last_operation_time'] = time.time()
     # Verify the Group Type to see if host or guest
     str = getgroupType()
     return render_template('dashboard.html')
@@ -253,6 +299,8 @@ def signup():
 
 @app.route('/propertySearch', methods = ['POST'])
 def propertySearch():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     # eventually query db on location, guests, and maybe checkin and checkout dates
     results = Properties
     searchLocation = request.form['location']
@@ -273,36 +321,47 @@ def propertySearch():
 
 @app.route('/searchProperties', methods=['GET', 'POST'])
 def searchProperties():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     return render_template('property_search.html')
-
 
 @app.route('/add_property', methods=['GET', 'POST'])
 @is_logged_in
 @hostRole
 def add_property():
+    if 'last_operation_time' in session:
+        session['last_operation_time'] = time.time()
     form = PropertyForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
+        print("inside add method")
         title = form.title.data
         body = form.body.data
         cur = mysql.connection.cursor()
-        user_id = cur.execute("SELECT id from users WHERE username = %s", session['username'])
-        user_id = cur.fetchone()
+        userName = session['username']
+        print("about to execute select command")
+        userId = cur.execute("SELECT id FROM users WHERE username = %s", [userName])
+        print("done with exec")
+        userId = cur.fetchone()
+        print("done with fetch")
+        user_id = int(userId["id"])
+
         cur.close()
-        print("From add propety Id")
-        print (user_id)
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO Properties(title, body, user_id) VALUES(%s, %s, %s)", (title, body, user_id))
-        mysql.connection.commit()
-        cur.close()
-        flash('Property Created', 'success')
+        print("about to exec the properties")
+        cur.execute("INSERT INTO Properties(title, property_description, guests, user_id) VALUES(%s, %s, %s, %s)", (title, body, 0, user_id))
 
+        mysql.connection.commit()
+        print("done with conn commit")
+        cur.close()
+
+        flash('Property Created', 'success')
         return redirect(url_for('dashboard'))
     return render_template('add_property.html', form=form)
 
 @app.route('/view_property', methods=['GET', 'POST'])
 @hostRole
-def view_files():
+def view_property():
 
     # TODO either encrypt and create a new session token every few minutes
     userName = session['username']
@@ -310,22 +369,27 @@ def view_files():
     print (userName)
 
     cur = mysql.connection.cursor()
-    userId = cur.execute("SELECT id from users WHERE username = %s", userName)
+    userId = cur.execute("SELECT id FROM users WHERE username = %s", [userName])
     userId = cur.fetchone()
+
+    val = int(userId["id"])
+
     cur.close()
 
     print ("User ID is")
-    print (userId)
+    print (val)
 
 
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT title, property_description from Properties WHERE user_id = %s", [userId])
+    result = cur.execute("SELECT title, property_description from Properties WHERE user_id = %s", [val])
     rows = cur.fetchall()
     cur.close()
     return render_template('view_property.html', rows=rows)
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     currentUserId = session['username']
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT name, email, username FROM users WHERE id = %s", [currentUserId])
@@ -338,6 +402,8 @@ def profile():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
+    if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
+        session['last_operation_time'] = time.time()
     if request.method == 'POST':
 
         # check if the post request has the file part
