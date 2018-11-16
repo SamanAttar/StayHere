@@ -178,7 +178,7 @@ def signinbad():
             app.logger.info('%s logged in successfully', username)
             return redirect(url_for('dashboard'))
         else:
-            error = 'Username not found'
+            error = 'Username and/or Password was innorrect'
             return render_template('signinbad.html', error=error)
 
     return render_template('signinbad.html')
@@ -204,7 +204,7 @@ def login():
 
         # check if user is locked out
         if 'bad_login_count' in session and session['bad_login_count'] >= MAX_LOGIN_ATTEMPTS:
-            error = 'You are currently locked out.  Try again tomorrow.'
+            error = 'You are currently locked out. Please check your email.'
             return render_template('login.html', error=error)
 
         # Get Form Fields
@@ -242,9 +242,9 @@ def login():
             cur.close()
         else:
             if increment_bad_login_count():
-                error = 'Username not found. You are now locked out.'
+                error = 'Username and/or Password was innorrect too many times. You are now locked out.'
             else:
-                error = 'Username not found'
+                error = 'Username and/or Password was innorrect'
             return render_template('login.html', error=error)
 
     return render_template('login.html')
@@ -317,7 +317,11 @@ def propertySearch():
     elif (len(results) == 0):
         return render_template('no_property.html')
     else:
-        return render_template('properties.html', properties = results)
+        cur = mysql.connection.cursor()
+        result = cur.execute("SELECT title, property_description from Properties")
+        rows = cur.fetchall()
+        cur.close()
+        return render_template('properties.html', rows = rows)
 
 @app.route('/searchProperties', methods=['GET', 'POST'])
 def searchProperties():
@@ -336,6 +340,7 @@ def add_property():
         print("inside add method")
         title = form.title.data
         body = form.body.data
+        location = form.location.data
         cur = mysql.connection.cursor()
         userName = session['username']
         print("about to execute select command")
@@ -349,7 +354,7 @@ def add_property():
 
         cur = mysql.connection.cursor()
         print("about to exec the properties")
-        cur.execute("INSERT INTO Properties(title, property_description, guests, user_id) VALUES(%s, %s, %s, %s)", (title, body, 0, user_id))
+        cur.execute("INSERT INTO Properties(title, property_description, guests, location, user_id) VALUES(%s, %s, %s, %s, %s)", (title, body, 0, location, user_id))
 
         mysql.connection.commit()
         print("done with conn commit")
@@ -381,7 +386,7 @@ def view_property():
 
 
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT title, property_description from Properties WHERE user_id = %s", [val])
+    result = cur.execute("SELECT title, property_description, location from Properties WHERE user_id = %s", [val])
     rows = cur.fetchall()
     cur.close()
     return render_template('view_property.html', rows=rows)

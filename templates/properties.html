@@ -1,23 +1,20 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<h1> TODO: Fix This issue </h1>
-<br>
-  <h1> Properties </h1>
-    <ul class="list-group">
-      {% for property in properties %}
-        <li class="list-group-item"><a href="/property/{{property.id}}">{{property.title}}</a></li>
-      {% endfor %}
-    </ul>
-{% endblock %}
-
-
-
-<!--
-<h1> Properties </h1>
-  <ul class="list-group">
-    {% for property in properties %}
-      <li class="list-group-item"><a href="properties/{{properties.id}}">{{property.title}}</a></li>
+<div class="fluid-container">
+  <table style="width:100%">
+    <tr>
+      <th> Property </th>
+      <th> Description </th>
+      <th> Location </th>
+    </tr>
+    {% for row in rows %}
+      <tr>
+        <td> {{ row["title"] }}  </td>
+        <td> {{ row["property_description"] }}</td>
+        <td> {{ row["location"] }}</td>
+      </tr>
     {% endfor %}
-  </ul>
--->
+  </table>
+</div>
+{% endblock %}
