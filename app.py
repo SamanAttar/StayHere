@@ -303,26 +303,29 @@ def propertySearch():
     if 'last_operation_time' in session and time.time() - session['last_operation_time'] < INACTIVITY_DUARTION:
         session['last_operation_time'] = time.time()
     # eventually query db on location, guests, and maybe checkin and checkout dates
-    results = Properties
-    searchLocation = request.form['location']
-    if searchLocation is not None and searchLocation != '':
-        results = list(filter(lambda x: searchLocation.lower() in x['location'].lower(), results))
-    if (request.form['guests'] == ''):
-        searchGuests = 0
-    else:
-        searchGuests = int(request.form['guests'])
-    results = list(filter(lambda x: x['guests'] >= searchGuests, results))
+    # results = Properties
+    # searchLocation = request.form['location']
+    # if searchLocation is not None and searchLocation != '':
+    #     results = list(filter(lambda x: searchLocation.lower() in x['location'].lower(), results))
+    # if (request.form['guests'] == ''):
+    #     searchGuests = 0
+    # else:
+    #     searchGuests = int(request.form['guests'])
+    # results = list(filter(lambda x: x['guests'] >= searchGuests, results))
+
+    cur = mysql.connection.cursor()
+    x = cur.execute("SELECT property_id as id, title, property_description,location from Properties")
+
+    results = cur.fetchall()
+    cur.close()
+
     if (not 'logged_in' in session and len(results) > 0):
-        del results[1:]
+        results = results [0:1]
         return render_template('properties_notLogin.html', properties = results)
     elif (len(results) == 0):
         return render_template('no_property.html')
     else:
-        cur = mysql.connection.cursor()
-        result = cur.execute("SELECT title, property_description,location from Properties")
-        rows = cur.fetchall()
-        cur.close()
-        return render_template('properties.html', rows = rows)
+        return render_template('properties.html', properties = results)
 
 @app.route('/searchProperties', methods=['GET', 'POST'])
 def searchProperties():

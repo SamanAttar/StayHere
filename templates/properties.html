@@ -2,19 +2,11 @@
 
 {% block body %}
 <div class="fluid-container">
-  <table style="width:100%">
-    <tr>
-      <th> Property </th>
-      <th> Description </th>
-      <th> Location </th>
-    </tr>
-    {% for row in rows %}
-      <tr>
-        <td> {{ row["title"] }}  </td>
-        <td> {{ row["property_description"] }}</td>
-        <td> {{ row["location"] }}</td>
-      </tr>
-    {% endfor %}
-  </table>
+  <h1> Properties </h1>
+    <ul class="list-group">
+      {% for property in properties %}
+        <li class="list-group-item"><a href="/property/{{property.id}}">{{property.title}}</a></li>
+      {% endfor %}
+    </ul>
 </div>
 {% endblock %}
