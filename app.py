@@ -351,21 +351,16 @@ def add_property():
         location = form.location.data
         cur = mysql.connection.cursor()
         userName = session['username']
-        print("about to execute select command")
         userId = cur.execute("SELECT id FROM users WHERE username = %s", [userName])
-        print("done with exec")
         userId = cur.fetchone()
-        print("done with fetch")
         user_id = int(userId["id"])
 
         cur.close()
 
         cur = mysql.connection.cursor()
-        print("about to exec the properties")
         cur.execute("INSERT INTO Properties(title, property_description, guests, location, user_id) VALUES(%s, %s, %s, %s, %s)", (title, body, 0, location, user_id))
 
         mysql.connection.commit()
-        print("done with conn commit")
         cur.close()
 
         flash('Property Created', 'success')
@@ -378,20 +373,12 @@ def view_property():
 
     # TODO either encrypt and create a new session token every few minutes
     userName = session['username']
-    print ("User name is")
-    print (userName)
-
     cur = mysql.connection.cursor()
     userId = cur.execute("SELECT id FROM users WHERE username = %s", [userName])
     userId = cur.fetchone()
 
     val = int(userId["id"])
-
     cur.close()
-
-    print ("User ID is")
-    print (val)
-
 
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT title, property_description, location from Properties WHERE user_id = %s", [val])

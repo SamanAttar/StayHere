@@ -3,10 +3,21 @@
 {% block body %}
 <div class="fluid-container">
   <h1> Properties </h1>
-    <ul class="list-group">
+    <table style="width:100%">
+      <tr>
+        <th> Property </th>
+        <th> Description </th>
+        <th> Location </th>
+      </tr>
       {% for property in properties %}
-        <li class="list-group-item"><a href="/property/{{property.id}}">{{property.title}}</a></li>
+      <tr>
+        <td>
+          <a href="/property/{{property.id}}">{{ property["title"] }} </a>
+        </td>
+        <td> {{ property["property_description"] }}</td>
+        <td> {{ property["location"] }}</td>
+      </tr>
       {% endfor %}
-    </ul>
+    </table>
 </div>
 {% endblock %}
