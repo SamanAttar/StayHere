@@ -319,6 +319,10 @@ def propertySearch():
     results = cur.fetchall()
     cur.close()
 
+    searchLocation = request.form['location']
+    if searchLocation is not None and searchLocation != '':
+        results = list(filter(lambda x: searchLocation.lower() in x['location'].lower(), results))
+
     if (not 'logged_in' in session and len(results) > 0):
         results = results [0:1]
         return render_template('properties_notLogin.html', properties = results)
